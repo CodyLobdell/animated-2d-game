@@ -22,6 +22,14 @@ class Player {
   this.radius = 40;
 
   }
+  draw(context){
+    context.beginPath();
+    context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    context.stroke();
+  }
+  update(){
+    this.x = this.game.mouse.x;
+  }
 }
 
 class Game {
@@ -30,6 +38,7 @@ class Game {
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.planet = new Planet(this);
+    this.player = new Player(this);
 
     this.mouse = {
       x: 0,
@@ -44,6 +53,8 @@ class Game {
 
   render(context) {
     this.planet.draw(context);
+    this.player.draw(context);
+    this.player.update();
     context.beginPath();
     context.moveto(this.planet.x, this.planet.y);
     context.lineTo(this.mouse.x, this.mouse.y);
