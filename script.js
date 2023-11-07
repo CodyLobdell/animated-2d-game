@@ -15,19 +15,21 @@ class Planet {
 }
 
 class Player {
-  constructor(game){
-  this.game = game;
-  this.x = this.game.width * 0.5;
-  this.y = this.game.height * 0.5;
-  this.radius = 40;
+  constructor(game) {
+    this.game = game;
+    this.x = this.game.width * 0.5;
+    this.y = this.game.height * 0.5;
+    this.radius = 40;
+    this.image = document.getElementById('player');
 
   }
-  draw(context){
+  draw(context) {
+    context.drawImage(this.image, this.x - this.radius, this.y - this.radius);
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.stroke();
   }
-  update(){
+  update() {
     this.x = this.game.mouse.x;
   }
 }
@@ -59,6 +61,14 @@ class Game {
     context.moveto(this.planet.x, this.planet.y);
     context.lineTo(this.mouse.x, this.mouse.y);
     context.stroke();
+  }
+  calcAim(a, b) {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    const distance = Math.hypot(dx, dy);
+    const aimX = dx / distance;
+    const aimY = dy / distance;
+    return [aimX, aimY, dx, dy];
   }
 }
 
