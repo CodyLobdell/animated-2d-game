@@ -8,9 +8,11 @@ class Planet {
   }
   draw(context) {
     context.drawImage(this.image, this.x - 100, this.y - 100);
-    context.beginPath();
-    context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    context.stroke();
+    if (this, game.debug) {
+      context.beginPath();
+      context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      context.stroke();
+    }
   }
 }
 
@@ -30,9 +32,12 @@ class Player {
     context.translate(this.x, this.y);
     context.rotate(this.angle);
     context.drawImage(this.image, this.x - this.radius, this.y - this.radius);
-    context.beginPath();
-    context.arc(0, 0, this.radius, 0, Math.PI * 2);
-    context.stroke();
+    if (this.game.debug) {
+
+      context.beginPath();
+      context.arc(0, 0, this.radius, 0, Math.PI * 2);
+      context.stroke();
+    }
     context.restore();
   }
   update() {
@@ -42,6 +47,22 @@ class Player {
     this.angle = Math.atan2(this.aim[2], this.aim[3]);
   }
 }
+class Projectile {
+  constructor(game) {
+    this.game = game;
+    this.x;
+    this.y;
+    this.radius = 20;
+    this.free = true
+  }
+  start() {
+    this.free = false;
+  }
+  reset() {
+    this.free = true;
+  }
+
+}
 
 class Game {
   constructor(canvas) {
@@ -50,6 +71,7 @@ class Game {
     this.height = this.canvas.height;
     this.planet = new Planet(this);
     this.player = new Player(this);
+    this.debug = true;
 
     this.mouse = {
       x: 0,
@@ -59,6 +81,9 @@ class Game {
     window.addEventListener('mousemove', e => {
       this.mouse.x = e.offsetX;
       this.mouse.y = e.offsetY;
+    });
+    window.addEventListener('keyup', e => {
+      if (e.key === 'd') this.debug = this.debug;
     });
   }
 
