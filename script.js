@@ -48,7 +48,7 @@ class Player {
   }
   shoot(){
     const projectile = this.hame.getProjectile();
-    if (projectile) projectile.start();
+    if (projectile) projectile.start(100, 100);
   }
 }
 class Projectile {
@@ -121,10 +121,10 @@ class Game {
     this.planet.draw(context);
     this.player.draw(context);
     this.player.update();
-    context.beginPath();
-    context.moveto(this.planet.x, this.planet.y);
-    context.lineTo(this.mouse.x, this.mouse.y);
-    context.stroke();
+    this.projectilePool.forEach(projectile => {
+      projectile.draw(context);
+      projectile.update();
+    });
   }
   calcAim(a, b) {
     const dx = a.x - b.x;
