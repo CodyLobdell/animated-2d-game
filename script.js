@@ -46,11 +46,12 @@ class Player {
     this.y = this.game.planet.y + (this.game.planet.radius + this.radius) * this.aim[1];
     this.angle = Math.atan2(this.aim[2], this.aim[3]);
   }
-  shoot(){
-    const projectile = this.hame.getProjectile();
-    if (projectile) projectile.start(100, 100);
+  shoot() {
+    const projectile = this.game.getProjectile();
+    if (projectile) projectile.start(this.x + this.radius * this.aim[0], this.y + this.radius * this.aim[1], this.aim[0], this.aim[1]);
   }
 }
+
 class Projectile {
   constructor(game) {
     this.game = game;
@@ -59,26 +60,37 @@ class Projectile {
     this.radius = 20;
     this.speedX = 1;
     this.speedY = 1;
+    this.speedModifier = 5;
     this.free = true;
   }
-  start(x, y) {
+  start(x, y, speedX, speedY) {
     this.free = false;
     this.x = x;
     this.y = y;
+    this.speedX = speedX * this.speedModifier;
+    this.speedY = speedY * this.speedModifier;
   }
   reset() {
     this.free = true;
   }
   draw(context) {
     if (!this.free) {
+      context.save();
       context.beginPath();
       context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      context.fillStyle = 'gold';
+      context.fill();
+      context.restore();
     }
   }
   update() {
     if (!this.free) {
       this.x += this.speedX;
       this.y += this.speedY;
+    }
+    //reset if outside of visible game proximity
+    if (this.x < 0 || this.x > this.game.width || this.y < 0 || this.y > this.game.height) {
+      this.reset();
     }
   }
 
@@ -94,7 +106,7 @@ class Game {
     this.debug = true;
 
     this.projectilePool = [];
-    this.numberPfPorjecttiles = 5;
+    this.numberOfProjectiles = 20;
     this.createProjectilePool();
 
     this.mouse = {
@@ -130,8 +142,8 @@ class Game {
     const dx = a.x - b.x;
     const dy = a.y - b.y;
     const distance = Math.hypot(dx, dy);
-    const aimX = dx / distance;
-    const aimY = dy / distance;
+    const aimX = dx / distance * -1;
+    const aimY = dy / distance * -1;
     return [aimX, aimY, dx, dy];
   }
   createProjectilePool() {
