@@ -99,8 +99,8 @@ class Projectile {
 class Enemy {
   constructor(game) {
     this.game = game;
-    this.x = 100;
-    this.y = 100;
+    this.x = 0;
+    this.y = 0;
     this.radius = 40;
     this.width = this.radius * 2;
     this.height = this.radius * 2;
@@ -110,6 +110,11 @@ class Enemy {
   }
   start() {
     this.free = false;
+    this.x = Math.random() * this.game.width;
+    this.y = Math.random() * this.game.height;
+    const aim = this.game.calcAim(this, this.game.planet);
+    this.speedX = aim[0];
+    this.speedY = aim[1];
   }
   reset() {
     this.free = true;
@@ -125,6 +130,14 @@ class Enemy {
     if (!this.free) {
       this.x += this.speedX;
       this.y += this.speedY;
+      // check collision enemy / planet
+      if (this.game.checkCollision(this, this.game.planet)) {
+        this.reset();
+      }
+      // check collision enemy / player
+      if (this.game.checkCollision(this, this.game.player)) {
+        this.reset();
+      }
     }
   }
 }
@@ -192,6 +205,13 @@ class Game {
     const aimX = dx / distance * -1;
     const aimY = dy / distance * -1;
     return [aimX, aimY, dx, dy];
+  }
+  checkCollision(a, b) {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+    const distance = Math.hypot(dx, dy);
+    const sumOfRadii = a.radius + b.radius;
+    return distance < sumOfRadii;
   }
   createProjectilePool() {
     for (let i = 0; i < this.numberOfProjectiles; i++) {
