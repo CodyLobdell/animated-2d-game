@@ -110,8 +110,14 @@ class Enemy {
   }
   start() {
     this.free = false;
-    this.x = Math.random() * this.game.width;
-    this.y = Math.random() * this.game.height;
+    if (Math.random() < 0.5) {
+      this.x = Math.random() * this.game.width;
+      this.y = Math.random() < 0.5 ? -this.redius : this.game.height + this.radius;
+    } else {
+      this.x = Math.random() < 0.5 ? -this.radius : this.game.width + this.game.radius;
+      this.y = Math.random() * this.game.height;
+    }
+
     const aim = this.game.calcAim(this, this.game.planet);
     this.speedX = aim[0];
     this.speedY = aim[1];
@@ -138,6 +144,14 @@ class Enemy {
       if (this.game.checkCollision(this, this.game.player)) {
         this.reset();
       }
+      //check enemy collision / projectiles
+      this.game.projectilePool.forEach(projectile => {
+        if (!projectile.free && this.game.checkCollision
+          (this, projectile)) {
+          projectile.reset();
+          this.reset();
+        }
+      })
     }
   }
 }
@@ -159,10 +173,8 @@ class Game {
     this.numberOfEnemies = 20;
     this.createEnemyPool();
     this.enemyPool[0].start();
-    this.enemyPool[1].start();
-    this.enemyPool[2].start();
-    this.enemyPool[3].start();
-    this.enemyPool[4].start();
+    this.enemyTimer = 0;
+    this.enemyInterval = 500;
 
     this.mouse = {
       x: 0,
@@ -185,7 +197,7 @@ class Game {
     });
   }
 
-  render(context) {
+  render(context, deltaTime) {
     this.planet.draw(context);
     this.player.draw(context);
     this.player.update();
@@ -197,7 +209,18 @@ class Game {
       enemy.draw(context);
       enemy.update();
     })
+    //periodcally activates enemy
+    if (this.enemyTimer < this.enemyInterval) {
+      this.enemyTimer += deltaTime;
+    } else {
+      this.enemyTimer = 0;
+      const enemy = this.getEnemy();
+      if (enemy) enemy.start();
+    }
   }
+
+
+
   calcAim(a, b) {
     const dx = a.x - b.x;
     const dy = a.y - b.y;
@@ -246,10 +269,15 @@ window.addEventListener('load', function () {
 
   const game = new Game(canvas);
 
-  function animate() {
+  let lastTime = 0;
+
+  function animate(timeStamp) {
+    const deltaTime = timeStamp - lastTime;
+    lastTime = timeStamp;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    game.render(ctx);
+    game.render(ctx, deltaTime);
     requestAnimationFrame(animate);
+
   }
   this.requestAnimationFrame(animate);
 });
